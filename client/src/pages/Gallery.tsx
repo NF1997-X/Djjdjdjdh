@@ -327,6 +327,7 @@ export default function Gallery() {
   });
 
   const handleCopyLink = (pageId: string) => {
+    console.log('handleCopyLink called with pageId:', pageId);
     sharePageMutation.mutate(pageId);
   };
 
