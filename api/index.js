@@ -1,4 +1,4 @@
-const { neon } = require('@neondatabase/serverless');
+import { neon } from '@neondatabase/serverless';
 
 const sql = neon(process.env.DATABASE_URL);
 
@@ -9,7 +9,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'Content-Type',
 };
 
-module.exports = async (req, res) => {
+export default async (req, res) => {
   // Handle preflight
   if (req.method === 'OPTIONS') {
     Object.keys(corsHeaders).forEach(key => {
