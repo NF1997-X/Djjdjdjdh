@@ -23,6 +23,22 @@ export default async (req, res) => {
     res.setHeader(key, corsHeaders[key]);
   });
 
+  // Parse body if not already parsed
+  if (req.method === 'POST' || req.method === 'PATCH' || req.method === 'PUT') {
+    if (!req.body && req.headers['content-type']?.includes('application/json')) {
+      try {
+        const bodyText = await new Promise((resolve) => {
+          let data = '';
+          req.on('data', chunk => data += chunk);
+          req.on('end', () => resolve(data));
+        });
+        req.body = JSON.parse(bodyText || '{}');
+      } catch (e) {
+        req.body = {};
+      }
+    }
+  }
+
   const { method } = req;
   const path = req.url.replace('/api', '');
 
