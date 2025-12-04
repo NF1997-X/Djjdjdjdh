@@ -23,27 +23,10 @@ export default async (req, res) => {
     res.setHeader(key, corsHeaders[key]);
   });
 
-  // Parse body if not already parsed
-  if (req.method === 'POST' || req.method === 'PATCH' || req.method === 'PUT') {
-    // Always try to read body for debugging
-    try {
-      const chunks = [];
-      for await (const chunk of req) {
-        chunks.push(chunk);
-      }
-      const bodyText = Buffer.concat(chunks).toString();
-      
-      if (bodyText && req.headers['content-type']?.includes('application/json')) {
-        req.body = JSON.parse(bodyText);
-      } else if (!req.body) {
-        req.body = {};
-      }
-    } catch (e) {
-      console.error('Body parse error:', e);
-      if (!req.body) {
-        req.body = {};
-      }
-    }
+  // Vercel automatically parses body, but we need to ensure it's available
+  // req.body is already parsed by Vercel
+  if (!req.body) {
+    req.body = {};
   }
 
   const { method } = req;
