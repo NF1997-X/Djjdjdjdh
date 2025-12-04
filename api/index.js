@@ -25,19 +25,23 @@ export default async (req, res) => {
 
   // Parse body if not already parsed
   if (req.method === 'POST' || req.method === 'PATCH' || req.method === 'PUT') {
-    if (!req.body || Object.keys(req.body).length === 0) {
-      if (req.headers['content-type']?.includes('application/json')) {
-        try {
-          const bodyText = await new Promise((resolve) => {
-            let data = '';
-            req.on('data', chunk => data += chunk);
-            req.on('end', () => resolve(data));
-          });
-          req.body = JSON.parse(bodyText || '{}');
-        } catch (e) {
-          console.error('Body parse error:', e);
-          req.body = {};
-        }
+    // Always try to read body for debugging
+    try {
+      const chunks = [];
+      for await (const chunk of req) {
+        chunks.push(chunk);
+      }
+      const bodyText = Buffer.concat(chunks).toString();
+      
+      if (bodyText && req.headers['content-type']?.includes('application/json')) {
+        req.body = JSON.parse(bodyText);
+      } else if (!req.body) {
+        req.body = {};
+      }
+    } catch (e) {
+      console.error('Body parse error:', e);
+      if (!req.body) {
+        req.body = {};
       }
     }
   }
