@@ -25,16 +25,19 @@ export default async (req, res) => {
 
   // Parse body if not already parsed
   if (req.method === 'POST' || req.method === 'PATCH' || req.method === 'PUT') {
-    if (!req.body && req.headers['content-type']?.includes('application/json')) {
-      try {
-        const bodyText = await new Promise((resolve) => {
-          let data = '';
-          req.on('data', chunk => data += chunk);
-          req.on('end', () => resolve(data));
-        });
-        req.body = JSON.parse(bodyText || '{}');
-      } catch (e) {
-        req.body = {};
+    if (!req.body || Object.keys(req.body).length === 0) {
+      if (req.headers['content-type']?.includes('application/json')) {
+        try {
+          const bodyText = await new Promise((resolve) => {
+            let data = '';
+            req.on('data', chunk => data += chunk);
+            req.on('end', () => resolve(data));
+          });
+          req.body = JSON.parse(bodyText || '{}');
+        } catch (e) {
+          console.error('Body parse error:', e);
+          req.body = {};
+        }
       }
     }
   }
@@ -276,10 +279,16 @@ export default async (req, res) => {
 
     // Upload endpoint (ImgBB)
     if (path === '/upload' && method === 'POST') {
+      // Ensure body is parsed
+      if (!req.body) {
+        req.body = {};
+      }
+      
       const { image } = req.body;
       
       if (!image) {
-        return res.status(400).json({ error: 'No image data provided' });
+        console.error('Upload error: No image data in body', req.body);
+        return res.status(400).json({ error: 'No image data provided', receivedBody: Object.keys(req.body) });
       }
 
       const apiKey = process.env.IMGBB_API_KEY;
@@ -287,17 +296,20 @@ export default async (req, res) => {
         return res.status(500).json({ error: 'ImgBB API key not configured' });
       }
 
-      // Upload to ImgBB
-      const formData = new URLSearchParams();
-      formData.append('image', image.replace(/^data:image\/\w+;base64,/, ''));
+      try {
+        // Upload to ImgBB
+        const formData = new URLSearchParams();
+        formData.append('image', image.replace(/^data:image\/\w+;base64,/, ''));
 
-      const response = await fetch(`https://api.imgbb.com/1/upload?key=${apiKey}`, {
-        method: 'POST',
-        body: formData,
-      });
+        const response = await fetch(`https://api.imgbb.com/1/upload?key=${apiKey}`, {
+          method: 'POST',
+          body: formData,
+        });
 
-      if (!response.ok) {
-        throw new Error('Failed to upload to ImgBB');
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`Failed to upload to ImgBB: ${errorText}`);
+        }
       }
 
       const data = await response.json();
