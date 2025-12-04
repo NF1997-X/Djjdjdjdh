@@ -273,47 +273,59 @@ export default function Gallery() {
       const shareUrl = `${baseUrl}/preview/${shareLink.shortCode}`;
       console.log('Share URL:', shareUrl);
       
-      try {
-        if (navigator.clipboard && window.isSecureContext) {
+      // Try multiple copy methods
+      let copySuccess = false;
+      
+      // Method 1: Clipboard API (modern)
+      if (navigator.clipboard) {
+        try {
           await navigator.clipboard.writeText(shareUrl);
-          console.log('Clipboard write success');
-          toast({ 
-            title: "Link copied!", 
-            description: "Preview link copied to clipboard"
-          });
-        } else {
-          // Fallback for non-secure contexts
-          console.log('Using fallback copy method');
+          console.log('Clipboard API success');
+          copySuccess = true;
+        } catch (err) {
+          console.log('Clipboard API failed:', err);
+        }
+      }
+      
+      // Method 2: execCommand (fallback)
+      if (!copySuccess) {
+        try {
           const textArea = document.createElement("textarea");
           textArea.value = shareUrl;
           textArea.style.position = "fixed";
-          textArea.style.left = "-999999px";
+          textArea.style.top = "0";
+          textArea.style.left = "0";
+          textArea.style.opacity = "0";
           document.body.appendChild(textArea);
+          textArea.focus();
           textArea.select();
-          try {
-            document.execCommand('copy');
-            console.log('execCommand copy success');
-            toast({ 
-              title: "Link copied!", 
-              description: "Preview link copied to clipboard"
-            });
-          } catch (err) {
-            console.error('execCommand copy failed:', err);
-            toast({ 
-              title: "Preview link ready", 
-              description: shareUrl,
-              variant: "default"
-            });
-          } finally {
-            document.body.removeChild(textArea);
+          
+          const successful = document.execCommand('copy');
+          document.body.removeChild(textArea);
+          
+          if (successful) {
+            console.log('execCommand success');
+            copySuccess = true;
+          } else {
+            console.log('execCommand failed');
           }
+        } catch (err) {
+          console.error('execCommand error:', err);
         }
-      } catch (err) {
-        console.error('Copy error:', err);
+      }
+      
+      // Show appropriate toast
+      if (copySuccess) {
+        toast({ 
+          title: "Link copied!", 
+          description: "Preview link copied to clipboard"
+        });
+      } else {
+        // Show link in toast if copy failed
         toast({ 
           title: "Preview link ready", 
           description: shareUrl,
-          variant: "default"
+          duration: 10000,
         });
       }
     },
