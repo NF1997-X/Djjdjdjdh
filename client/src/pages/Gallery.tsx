@@ -255,27 +255,35 @@ export default function Gallery() {
 
   const sharePageMutation = useMutation({
     mutationFn: async (pageId: string): Promise<ShareLink> => {
+      console.log('Fetching share link for page:', pageId);
       const response = await apiRequest(`/api/share-links/${pageId}`, "POST");
+      console.log('Share link response:', response);
       // Convert snake_case to camelCase
-      return {
+      const shareLink = {
         ...response,
         pageId: response.page_id || response.pageId,
         shortCode: response.short_code || response.shortCode,
       };
+      console.log('Converted share link:', shareLink);
+      return shareLink;
     },
     onSuccess: async (shareLink: ShareLink) => {
+      console.log('Share link success:', shareLink);
       const baseUrl = window.location.origin;
       const shareUrl = `${baseUrl}/preview/${shareLink.shortCode}`;
+      console.log('Share URL:', shareUrl);
       
       try {
         if (navigator.clipboard && window.isSecureContext) {
           await navigator.clipboard.writeText(shareUrl);
+          console.log('Clipboard write success');
           toast({ 
             title: "Link copied!", 
             description: "Preview link copied to clipboard"
           });
         } else {
           // Fallback for non-secure contexts
+          console.log('Using fallback copy method');
           const textArea = document.createElement("textarea");
           textArea.value = shareUrl;
           textArea.style.position = "fixed";
@@ -284,11 +292,13 @@ export default function Gallery() {
           textArea.select();
           try {
             document.execCommand('copy');
+            console.log('execCommand copy success');
             toast({ 
               title: "Link copied!", 
               description: "Preview link copied to clipboard"
             });
           } catch (err) {
+            console.error('execCommand copy failed:', err);
             toast({ 
               title: "Preview link ready", 
               description: shareUrl,
@@ -299,14 +309,16 @@ export default function Gallery() {
           }
         }
       } catch (err) {
+        console.error('Copy error:', err);
         toast({ 
-          title: "Share link created", 
+          title: "Preview link ready", 
           description: shareUrl,
           variant: "default"
         });
       }
     },
-    onError: () => {
+    onError: (error) => {
+      console.error('Share link error:', error);
       toast({ 
         title: "Failed to create share link", 
         variant: "destructive" 
