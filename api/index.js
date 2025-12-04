@@ -310,17 +310,20 @@ export default async (req, res) => {
           const errorText = await response.text();
           throw new Error(`Failed to upload to ImgBB: ${errorText}`);
         }
-      }
 
-      const data = await response.json();
-      
-      return res.status(200).json({ 
-        url: data.data.url,
-        display_url: data.data.display_url,
-        thumb_url: data.data.thumb.url,
-        medium_url: data.data.medium?.url,
-        delete_url: data.data.delete_url
-      });
+        const data = await response.json();
+        
+        return res.status(200).json({ 
+          url: data.data.url,
+          display_url: data.data.display_url,
+          thumb_url: data.data.thumb.url,
+          medium_url: data.data.medium?.url,
+          delete_url: data.data.delete_url
+        });
+      } catch (uploadError) {
+        console.error('ImgBB upload error:', uploadError);
+        return res.status(500).json({ error: 'Failed to upload image', details: uploadError.message });
+      }
     }
 
     // Share links
