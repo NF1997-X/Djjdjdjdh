@@ -272,7 +272,7 @@ export default function Gallery() {
           await navigator.clipboard.writeText(shareUrl);
           toast({ 
             title: "Link copied!", 
-            description: "Share link copied to clipboard"
+            description: "Preview link copied to clipboard"
           });
         } else {
           // Fallback for non-secure contexts
@@ -286,11 +286,11 @@ export default function Gallery() {
             document.execCommand('copy');
             toast({ 
               title: "Link copied!", 
-              description: "Share link copied to clipboard"
+              description: "Preview link copied to clipboard"
             });
           } catch (err) {
             toast({ 
-              title: "Share link created", 
+              title: "Preview link ready", 
               description: shareUrl,
               variant: "default"
             });
