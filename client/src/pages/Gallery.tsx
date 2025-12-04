@@ -11,6 +11,7 @@ import { AddRowDialog } from "@/components/AddRowDialog";
 import { EditRowDialog } from "@/components/EditRowDialog";
 import { AddPageDialog } from "@/components/AddPageDialog";
 import { EditPageDialog } from "@/components/EditPageDialog";
+import { ShareLinkDialog } from "@/components/ShareLinkDialog";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -39,6 +40,7 @@ export default function Gallery() {
   const [addPageDialog, setAddPageDialog] = useState(false);
   const [editPageDialog, setEditPageDialog] = useState<{ open: boolean; pageId?: string }>({ open: false });
   const [deletePageDialog, setDeletePageDialog] = useState<{ open: boolean; pageId?: string }>({ open: false });
+  const [shareLinkDialog, setShareLinkDialog] = useState<{ open: boolean; url?: string }>({ open: false });
   
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxImages, setLightboxImages] = useState<{ src: string; thumb: string }[]>([]);
@@ -273,61 +275,8 @@ export default function Gallery() {
       const shareUrl = `${baseUrl}/preview/${shareLink.shortCode}`;
       console.log('Share URL:', shareUrl);
       
-      // Try multiple copy methods
-      let copySuccess = false;
-      
-      // Method 1: Clipboard API (modern)
-      if (navigator.clipboard) {
-        try {
-          await navigator.clipboard.writeText(shareUrl);
-          console.log('Clipboard API success');
-          copySuccess = true;
-        } catch (err) {
-          console.log('Clipboard API failed:', err);
-        }
-      }
-      
-      // Method 2: execCommand (fallback)
-      if (!copySuccess) {
-        try {
-          const textArea = document.createElement("textarea");
-          textArea.value = shareUrl;
-          textArea.style.position = "fixed";
-          textArea.style.top = "0";
-          textArea.style.left = "0";
-          textArea.style.opacity = "0";
-          document.body.appendChild(textArea);
-          textArea.focus();
-          textArea.select();
-          
-          const successful = document.execCommand('copy');
-          document.body.removeChild(textArea);
-          
-          if (successful) {
-            console.log('execCommand success');
-            copySuccess = true;
-          } else {
-            console.log('execCommand failed');
-          }
-        } catch (err) {
-          console.error('execCommand error:', err);
-        }
-      }
-      
-      // Show appropriate toast
-      if (copySuccess) {
-        toast({ 
-          title: "Link copied!", 
-          description: "Preview link copied to clipboard"
-        });
-      } else {
-        // Show link in toast if copy failed
-        toast({ 
-          title: "Preview link ready", 
-          description: shareUrl,
-          duration: 10000,
-        });
-      }
+      // Show dialog instead of trying to copy
+      setShareLinkDialog({ open: true, url: shareUrl });
     },
     onError: (error) => {
       console.error('Share link error:', error);
@@ -548,6 +497,12 @@ export default function Gallery() {
         }}
         title="Delete Page?"
         description="This will permanently delete the page and all its rows and images. This action cannot be undone."
+      />
+
+      <ShareLinkDialog
+        open={shareLinkDialog.open}
+        onOpenChange={(open) => setShareLinkDialog({ open })}
+        shareUrl={shareLinkDialog.url || ""}
       />
     </div>
   );
