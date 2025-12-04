@@ -105,6 +105,7 @@ export default function Gallery() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/pages"] });
+      setEditPageDialog({ open: false });
       toast({ title: "Page renamed successfully" });
     },
   });
@@ -139,6 +140,7 @@ export default function Gallery() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/pages", activePage, "rows"] });
+      setEditRowDialog({ open: false });
       toast({ title: "Row updated successfully" });
     },
   });
@@ -187,6 +189,7 @@ export default function Gallery() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/images", activePage] });
+      setEditImageDialog({ open: false });
       toast({ title: "Image updated successfully" });
     },
   });
@@ -197,7 +200,8 @@ export default function Gallery() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/images", activePage] });
-      toast({ title: "Image deleted successfully" });
+      setEditImageDialog({ open: false });
+      toast({ title: "Image updated successfully" });
     },
   });
 
