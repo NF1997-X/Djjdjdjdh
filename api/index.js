@@ -230,7 +230,7 @@ export default async (req, res) => {
 
     // Create image
     if (path === '/images' && method === 'POST') {
-      const { row_id, rowId, url, title, description } = req.body;
+      const { row_id, rowId, url, title, subtitle } = req.body;
       const finalRowId = row_id || rowId;
       
       if (!finalRowId) {
@@ -238,8 +238,8 @@ export default async (req, res) => {
       }
       
       const result = await sql`
-        INSERT INTO images (row_id, url, title, description) 
-        VALUES (${finalRowId}, ${url}, ${title || null}, ${description || null}) 
+        INSERT INTO images (row_id, url, title, subtitle) 
+        VALUES (${finalRowId}, ${url}, ${title || null}, ${subtitle || null}) 
         RETURNING *
       `;
       return res.status(201).json(result[0]);
@@ -248,12 +248,12 @@ export default async (req, res) => {
     // Update image
     if (path.match(/^\/images\/[^/]+$/) && method === 'PATCH') {
       const imageId = path.split('/')[2];
-      const { url, title, description, order } = req.body;
+      const { url, title, subtitle, order } = req.body;
       
       const updates = [];
       if (url !== undefined) updates.push(`url = '${url}'`);
       if (title !== undefined) updates.push(`title = '${title}'`);
-      if (description !== undefined) updates.push(`description = '${description}'`);
+      if (subtitle !== undefined) updates.push(`subtitle = '${subtitle}'`);
       if (order !== undefined) updates.push(`"order" = ${order}`);
       
       if (updates.length === 0) {
