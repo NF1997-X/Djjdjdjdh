@@ -100,23 +100,29 @@ export function HorizontalScrollRow({
               <ChevronRight className="w-5 h-5" />
             </Button>
           </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="w-10 h-10" data-testid="button-row-menu">
-                <MoreVertical className="w-5 h-5" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={onEditRow} data-testid="menu-edit-row">
-                <Edit className="w-4 h-4 mr-2" />
-                Edit Row
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={onDeleteRow} className="text-destructive" data-testid="menu-delete-row">
-                <Trash2 className="w-4 h-4 mr-2" />
-                Delete Row
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          {(onEditRow || onDeleteRow) && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="w-10 h-10" data-testid="button-row-menu">
+                  <MoreVertical className="w-5 h-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {onEditRow && (
+                  <DropdownMenuItem onClick={onEditRow} data-testid="menu-edit-row">
+                    <Edit className="w-4 h-4 mr-2" />
+                    Edit Row
+                  </DropdownMenuItem>
+                )}
+                {onDeleteRow && (
+                  <DropdownMenuItem onClick={onDeleteRow} className="text-destructive" data-testid="menu-delete-row">
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Delete Row
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </div>
       </div>
 
@@ -148,32 +154,36 @@ export function HorizontalScrollRow({
                   className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                   data-testid={`img-item-${index}`}
                 />
-                {hoveredImage === image.id && (
+                {hoveredImage === image.id && (onEditImage || onDeleteImage) && (
                   <div className="absolute inset-0 bg-black/60 flex items-center justify-center gap-2 transition-opacity duration-200">
-                    <Button
-                      variant="secondary"
-                      size="icon"
-                      className="w-8 h-8"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onEditImage?.(image.id);
-                      }}
-                      data-testid={`button-edit-image-${index}`}
-                    >
-                      <Edit className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      variant="destructive"
-                      size="icon"
-                      className="w-8 h-8"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onDeleteImage?.(image.id);
-                      }}
-                      data-testid={`button-delete-image-${index}`}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
+                    {onEditImage && (
+                      <Button
+                        variant="secondary"
+                        size="icon"
+                        className="w-8 h-8"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onEditImage(image.id);
+                        }}
+                        data-testid={`button-edit-image-${index}`}
+                      >
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                    )}
+                    {onDeleteImage && (
+                      <Button
+                        variant="destructive"
+                        size="icon"
+                        className="w-8 h-8"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onDeleteImage(image.id);
+                        }}
+                        data-testid={`button-delete-image-${index}`}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    )}
                   </div>
                 )}
               </div>
@@ -189,20 +199,22 @@ export function HorizontalScrollRow({
           </div>
         ))}
 
-        <div
-          className="flex-shrink-0 w-[200px] md:w-[240px] cursor-pointer"
-          onClick={onAddImage}
-          data-testid="button-add-image-card"
-        >
-          <Card className="aspect-square border-2 border-dashed border-border hover-elevate active-elevate-2 transition-all duration-300 flex items-center justify-center">
-            <div className="text-center">
-              <div className="w-12 h-12 rounded-full bg-muted mx-auto mb-2 flex items-center justify-center">
-                <span className="text-2xl text-muted-foreground">+</span>
+        {onAddImage && (
+          <div
+            className="flex-shrink-0 w-[200px] md:w-[240px] cursor-pointer"
+            onClick={onAddImage}
+            data-testid="button-add-image-card"
+          >
+            <Card className="aspect-square border-2 border-dashed border-border hover-elevate active-elevate-2 transition-all duration-300 flex items-center justify-center">
+              <div className="text-center">
+                <div className="w-12 h-12 rounded-full bg-muted mx-auto mb-2 flex items-center justify-center">
+                  <span className="text-2xl text-muted-foreground">+</span>
+                </div>
+                <p className="text-sm text-muted-foreground">Add Image</p>
               </div>
-              <p className="text-sm text-muted-foreground">Add Image</p>
-            </div>
-          </Card>
-        </div>
+            </Card>
+          </div>
+        )}
       </div>
 
       <style>{`
