@@ -76,29 +76,40 @@ export default async (req, res) => {
       const pageId = path.split('/')[2];
       const { name, order } = req.body;
       
-      const updates = [];
-      const values = [];
-      
-      if (name !== undefined) {
-        updates.push('name = $' + (updates.length + 1));
-        values.push(name);
+      if (name !== undefined && order !== undefined) {
+        const result = await sql`
+          UPDATE pages 
+          SET name = ${name}, "order" = ${order}
+          WHERE id = ${pageId}
+          RETURNING *
+        `;
+        if (result.length === 0) {
+          return res.status(404).json({ error: 'Page not found' });
+        }
+        return res.status(200).json(result[0]);
+      } else if (name !== undefined) {
+        const result = await sql`
+          UPDATE pages 
+          SET name = ${name}
+          WHERE id = ${pageId}
+          RETURNING *
+        `;
+        if (result.length === 0) {
+          return res.status(404).json({ error: 'Page not found' });
+        }
+        return res.status(200).json(result[0]);
+      } else if (order !== undefined) {
+        const result = await sql`
+          UPDATE pages 
+          SET "order" = ${order}
+          WHERE id = ${pageId}
+          RETURNING *
+        `;
+        if (result.length === 0) {
+          return res.status(404).json({ error: 'Page not found' });
+        }
+        return res.status(200).json(result[0]);
       }
-      if (order !== undefined) {
-        updates.push('"order" = $' + (updates.length + 1));
-        values.push(order);
-      }
-      
-      if (updates.length === 0) {
-        return res.status(400).json({ error: 'No fields to update' });
-      }
-      
-      values.push(pageId);
-      const result = await sql`
-        UPDATE pages 
-        SET ${sql.unsafe(updates.join(', '))}
-        WHERE id = ${pageId}
-        RETURNING *
-      `;
       
       if (result.length === 0) {
         return res.status(404).json({ error: 'Page not found' });
@@ -159,20 +170,40 @@ export default async (req, res) => {
       const rowId = path.split('/')[2];
       const { title, order } = req.body;
       
-      const updates = [];
-      if (title !== undefined) updates.push(`title = '${title}'`);
-      if (order !== undefined) updates.push(`"order" = ${order}`);
-      
-      if (updates.length === 0) {
-        return res.status(400).json({ error: 'No fields to update' });
+      if (title !== undefined && order !== undefined) {
+        const result = await sql`
+          UPDATE rows 
+          SET title = ${title}, "order" = ${order}
+          WHERE id = ${rowId}
+          RETURNING *
+        `;
+        if (result.length === 0) {
+          return res.status(404).json({ error: 'Row not found' });
+        }
+        return res.status(200).json(result[0]);
+      } else if (title !== undefined) {
+        const result = await sql`
+          UPDATE rows 
+          SET title = ${title}
+          WHERE id = ${rowId}
+          RETURNING *
+        `;
+        if (result.length === 0) {
+          return res.status(404).json({ error: 'Row not found' });
+        }
+        return res.status(200).json(result[0]);
+      } else if (order !== undefined) {
+        const result = await sql`
+          UPDATE rows 
+          SET "order" = ${order}
+          WHERE id = ${rowId}
+          RETURNING *
+        `;
+        if (result.length === 0) {
+          return res.status(404).json({ error: 'Row not found' });
+        }
+        return res.status(200).json(result[0]);
       }
-      
-      const result = await sql.unsafe(`
-        UPDATE rows 
-        SET ${updates.join(', ')}
-        WHERE id = '${rowId}'
-        RETURNING *
-      `);
       
       if (result.length === 0) {
         return res.status(404).json({ error: 'Row not found' });
@@ -233,22 +264,25 @@ export default async (req, res) => {
       const imageId = path.split('/')[2];
       const { url, title, subtitle, order } = req.body;
       
-      const updates = [];
-      if (url !== undefined) updates.push(`url = '${url}'`);
-      if (title !== undefined) updates.push(`title = '${title}'`);
-      if (subtitle !== undefined) updates.push(`subtitle = '${subtitle}'`);
-      if (order !== undefined) updates.push(`"order" = ${order}`);
-      
-      if (updates.length === 0) {
+      // Build update conditionally based on provided fields
+      let result;
+      if (url !== undefined && title !== undefined && subtitle !== undefined && order !== undefined) {
+        result = await sql`UPDATE images SET url = ${url}, title = ${title}, subtitle = ${subtitle}, "order" = ${order} WHERE id = ${imageId} RETURNING *`;
+      } else if (url !== undefined && title !== undefined && subtitle !== undefined) {
+        result = await sql`UPDATE images SET url = ${url}, title = ${title}, subtitle = ${subtitle} WHERE id = ${imageId} RETURNING *`;
+      } else if (url !== undefined && title !== undefined) {
+        result = await sql`UPDATE images SET url = ${url}, title = ${title} WHERE id = ${imageId} RETURNING *`;
+      } else if (url !== undefined) {
+        result = await sql`UPDATE images SET url = ${url} WHERE id = ${imageId} RETURNING *`;
+      } else if (title !== undefined) {
+        result = await sql`UPDATE images SET title = ${title} WHERE id = ${imageId} RETURNING *`;
+      } else if (subtitle !== undefined) {
+        result = await sql`UPDATE images SET subtitle = ${subtitle} WHERE id = ${imageId} RETURNING *`;
+      } else if (order !== undefined) {
+        result = await sql`UPDATE images SET "order" = ${order} WHERE id = ${imageId} RETURNING *`;
+      } else {
         return res.status(400).json({ error: 'No fields to update' });
       }
-      
-      const result = await sql.unsafe(`
-        UPDATE images 
-        SET ${updates.join(', ')}
-        WHERE id = '${imageId}'
-        RETURNING *
-      `);
       
       if (result.length === 0) {
         return res.status(404).json({ error: 'Image not found' });
