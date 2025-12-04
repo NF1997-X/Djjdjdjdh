@@ -27,7 +27,13 @@ export default function Preview() {
     queryFn: async () => {
       const response = await fetch(`/api/share-links/${shortCode}`);
       if (!response.ok) throw new Error("Share link not found");
-      return response.json();
+      const data = await response.json();
+      // Convert snake_case to camelCase
+      return {
+        ...data,
+        pageId: data.page_id || data.pageId,
+        shortCode: data.short_code || data.shortCode,
+      };
     },
     enabled: !!shortCode,
   });
@@ -61,7 +67,11 @@ export default function Preview() {
         fetch(`/api/rows/${row.id}/images`).then((res) => res.json())
       );
       const imageArrays = await Promise.all(imagePromises);
-      return imageArrays.flat();
+      // Convert snake_case to camelCase for images
+      return imageArrays.flat().map((img: any) => ({
+        ...img,
+        rowId: img.row_id || img.rowId,
+      }));
     },
     enabled: rows.length > 0,
   });

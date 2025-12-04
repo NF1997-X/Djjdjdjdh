@@ -66,7 +66,11 @@ export default function Gallery() {
         fetch(`/api/rows/${row.id}/images`).then((res) => res.json())
       );
       const imageArrays = await Promise.all(imagePromises);
-      return imageArrays.flat();
+      // Convert snake_case to camelCase for images
+      return imageArrays.flat().map((img: any) => ({
+        ...img,
+        rowId: img.row_id || img.rowId,
+      }));
     },
     enabled: rows.length > 0,
   });
