@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight, Edit, Trash2, MoreVertical } from "lucide-react";
+import { ChevronLeft, ChevronRight, Edit, Trash2, MoreVertical, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useRef, useState, useEffect } from "react";
@@ -145,8 +145,13 @@ export function HorizontalScrollRow({
           >
             <Card className="overflow-hidden border-card-border hover-elevate active-elevate-2 transition-all duration-300">
               <div
-                className="relative aspect-square cursor-pointer overflow-hidden"
-                onClick={() => onImageClick?.(image, index)}
+                className={`relative aspect-square overflow-hidden ${!onEditImage && !onDeleteImage && onImageClick ? 'cursor-pointer' : ''}`}
+                onClick={() => {
+                  // Only allow direct click in preview mode (when no edit/delete buttons)
+                  if (!onEditImage && !onDeleteImage && onImageClick) {
+                    onImageClick(image, index);
+                  }
+                }}
               >
                 <img
                   src={image.url}
@@ -168,6 +173,20 @@ export function HorizontalScrollRow({
                         data-testid={`button-edit-image-${index}`}
                       >
                         <Edit className="w-4 h-4" />
+                      </Button>
+                    )}
+                    {onImageClick && (
+                      <Button
+                        variant="secondary"
+                        size="icon"
+                        className="w-8 h-8"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onImageClick(image, index);
+                        }}
+                        data-testid={`button-view-image-${index}`}
+                      >
+                        <Eye className="w-4 h-4" />
                       </Button>
                     )}
                     {onDeleteImage && (
