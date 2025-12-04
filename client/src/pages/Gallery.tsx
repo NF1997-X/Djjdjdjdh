@@ -252,7 +252,12 @@ export default function Gallery() {
   const sharePageMutation = useMutation({
     mutationFn: async (pageId: string): Promise<ShareLink> => {
       const response = await apiRequest(`/api/share-links/${pageId}`, "POST");
-      return response;
+      // Convert snake_case to camelCase
+      return {
+        ...response,
+        pageId: response.page_id || response.pageId,
+        shortCode: response.short_code || response.shortCode,
+      };
     },
     onSuccess: async (shareLink: ShareLink) => {
       const baseUrl = window.location.origin;
@@ -311,11 +316,18 @@ export default function Gallery() {
 
   const handleOpenPreview = async (pageId: string) => {
     try {
-      const shareLink: ShareLink = await apiRequest(`/api/share-links/${pageId}`, "POST");
+      const response = await apiRequest(`/api/share-links/${pageId}`, "POST");
+      // Convert snake_case to camelCase
+      const shareLink: ShareLink = {
+        ...response,
+        pageId: response.page_id || response.pageId,
+        shortCode: response.short_code || response.shortCode,
+      };
       const baseUrl = window.location.origin;
       const shareUrl = `${baseUrl}/preview/${shareLink.shortCode}`;
       window.open(shareUrl, '_blank');
     } catch (error) {
+      console.error('Preview error:', error);
       toast({ 
         title: "Failed to open preview", 
         variant: "destructive" 
