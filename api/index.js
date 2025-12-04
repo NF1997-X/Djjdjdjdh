@@ -133,10 +133,16 @@ export default async (req, res) => {
 
     // Create row
     if (path === '/rows' && method === 'POST') {
-      const { page_id, title } = req.body;
+      const { page_id, pageId, title } = req.body;
+      const finalPageId = page_id || pageId;
+      
+      if (!finalPageId) {
+        return res.status(400).json({ error: 'page_id or pageId is required' });
+      }
+      
       const result = await sql`
         INSERT INTO rows (page_id, title) 
-        VALUES (${page_id}, ${title}) 
+        VALUES (${finalPageId}, ${title}) 
         RETURNING *
       `;
       return res.status(201).json(result[0]);
@@ -201,10 +207,16 @@ export default async (req, res) => {
 
     // Create image
     if (path === '/images' && method === 'POST') {
-      const { row_id, url, title, description } = req.body;
+      const { row_id, rowId, url, title, description } = req.body;
+      const finalRowId = row_id || rowId;
+      
+      if (!finalRowId) {
+        return res.status(400).json({ error: 'row_id or rowId is required' });
+      }
+      
       const result = await sql`
         INSERT INTO images (row_id, url, title, description) 
-        VALUES (${row_id}, ${url}, ${title || null}, ${description || null}) 
+        VALUES (${finalRowId}, ${url}, ${title || null}, ${description || null}) 
         RETURNING *
       `;
       return res.status(201).json(result[0]);
