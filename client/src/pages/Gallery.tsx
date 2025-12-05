@@ -316,10 +316,13 @@ export default function Gallery() {
   };
 
   const handleImageClick = (rowImages: GalleryImage[], index: number) => {
+    console.log('handleImageClick called', { rowImages, index });
     const images = rowImages.map((img) => ({ src: img.url, thumb: img.url }));
+    console.log('lightbox images:', images);
     setLightboxImages(images);
     setLightboxIndex(index);
     setLightboxOpen(true);
+    console.log('lightbox should open now');
   };
 
   const currentEditImage = editImageDialog.imageId
@@ -404,6 +407,7 @@ export default function Gallery() {
         )}
       </main>
 
+      {console.log('lightboxOpen:', lightboxOpen, 'lightboxImages:', lightboxImages)}
       {lightboxOpen && (
         <LightGallery
           dynamic
