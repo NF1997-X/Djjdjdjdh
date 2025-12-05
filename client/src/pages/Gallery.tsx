@@ -412,8 +412,8 @@ export default function Gallery() {
             index={lightboxIndex}
             plugins={[lgThumbnail, lgZoom]}
             onAfterClose={() => setLightboxOpen(false)}
-            speed={300}
-            mode="lg-fade"
+            speed={500}
+            mode="lg-slide-circular-up"
           />
         </div>
       )}

@@ -147,6 +147,8 @@ export default function Preview() {
           index={lightboxIndex}
           plugins={[lgThumbnail, lgZoom]}
           onAfterClose={() => setLightboxOpen(false)}
+          speed={500}
+          mode="lg-slide-circular-up"
         />
       )}
     </div>
