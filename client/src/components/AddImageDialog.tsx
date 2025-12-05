@@ -77,6 +77,72 @@ export function AddImageDialog({ open, onOpenChange, onSubmit, isLoading = false
     }
   };
 
+  const compressImage = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (event) => {
+        const img = new Image();
+        img.src = event.target?.result as string;
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          
+          if (!ctx) {
+            reject(new Error('Failed to get canvas context'));
+            return;
+          }
+          
+          // More aggressive compression - smaller max dimensions
+          const MAX_WIDTH = 1200;
+          const MAX_HEIGHT = 1200;
+          
+          let width = img.width;
+          let height = img.height;
+          
+          // Calculate new dimensions maintaining aspect ratio
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height = Math.round(height * (MAX_WIDTH / width));
+              width = MAX_WIDTH;
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width = Math.round(width * (MAX_HEIGHT / height));
+              height = MAX_HEIGHT;
+            }
+          }
+          
+          canvas.width = width;
+          canvas.height = height;
+          
+          // Draw with better quality
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = 'high';
+          ctx.drawImage(img, 0, 0, width, height);
+          
+          // Start with lower quality and keep reducing if needed
+          let quality = 0.7;
+          let compressedBase64 = canvas.toDataURL('image/jpeg', quality);
+          
+          // Keep under 2MB to be safe (base64 adds ~33% overhead)
+          const maxSize = 2 * 1024 * 1024;
+          
+          while (compressedBase64.length > maxSize && quality > 0.3) {
+            quality -= 0.05;
+            compressedBase64 = canvas.toDataURL('image/jpeg', quality);
+          }
+          
+          console.log(`Compressed image: ${(compressedBase64.length / 1024 / 1024).toFixed(2)}MB, quality: ${quality}`);
+          
+          resolve(compressedBase64);
+        };
+        img.onerror = reject;
+      };
+      reader.onerror = reject;
+    });
+  };
+
   const handleUploadFile = async () => {
     if (!selectedFile) {
       setErrors({ url: "Please select a file" });
@@ -85,12 +151,15 @@ export function AddImageDialog({ open, onOpenChange, onSubmit, isLoading = false
 
     setUploading(true);
     try {
-      const formData = new FormData();
-      formData.append('image', selectedFile);
+      // Compress image before upload
+      const compressedBase64 = await compressImage(selectedFile);
 
       const response = await fetch('/api/upload', {
         method: 'POST',
-        body: formData,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ image: compressedBase64 }),
       });
 
       if (!response.ok) {
