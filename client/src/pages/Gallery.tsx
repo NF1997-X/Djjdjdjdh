@@ -322,16 +322,19 @@ export default function Gallery() {
     console.log('lightbox images:', images);
     setLightboxImages(images);
     setLightboxIndex(index);
-    setLightboxOpen(true);
-    console.log('lightbox should open now');
+    
+    // Set timeout to ensure state is updated before opening
+    setTimeout(() => {
+      setLightboxOpen(true);
+    }, 0);
   };
 
   useEffect(() => {
-    if (lightboxOpen && lightGalleryRef.current) {
-      console.log('Opening lightgallery with ref');
+    if (lightboxOpen && lightGalleryRef.current && lightboxImages.length > 0) {
+      console.log('Opening lightgallery with ref at index:', lightboxIndex);
       lightGalleryRef.current.openGallery(lightboxIndex);
     }
-  }, [lightboxOpen, lightboxIndex]);
+  }, [lightboxOpen]); // Only depend on lightboxOpen, not lightboxIndex
 
   const currentEditImage = editImageDialog.imageId
     ? allImages.find((i) => i.id === editImageDialog.imageId)

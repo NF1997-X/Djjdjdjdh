@@ -87,14 +87,18 @@ export default function Preview() {
     const images = rowImages.map((img) => ({ src: img.url, thumb: img.url }));
     setLightboxImages(images);
     setLightboxIndex(index);
-    setLightboxOpen(true);
+    
+    // Set timeout to ensure state is updated before opening
+    setTimeout(() => {
+      setLightboxOpen(true);
+    }, 0);
   };
 
   useEffect(() => {
-    if (lightboxOpen && lightGalleryRef.current) {
+    if (lightboxOpen && lightGalleryRef.current && lightboxImages.length > 0) {
       lightGalleryRef.current.openGallery(lightboxIndex);
     }
-  }, [lightboxOpen, lightboxIndex]);
+  }, [lightboxOpen]); // Only depend on lightboxOpen, not lightboxIndex
 
   if (shareLinkLoading || pageLoading || rowsLoading) {
     return (
