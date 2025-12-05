@@ -2,9 +2,14 @@ import { useState, useEffect } from "react";
 import { useRoute } from "wouter";
 import { HorizontalScrollRow, ImageItem } from "@/components/HorizontalScrollRow";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { X, ChevronLeft, ChevronRight } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import type { Page, Row, GalleryImage, ShareLink } from "@shared/schema";
+import LightGallery from "lightgallery/react";
+import lgThumbnail from "lightgallery/plugins/thumbnail";
+import lgZoom from "lightgallery/plugins/zoom";
+import "lightgallery/css/lightgallery.css";
+import "lightgallery/css/lg-thumbnail.css";
+import "lightgallery/css/lg-zoom.css";
 
 interface RowWithImages extends Row {
   images: GalleryImage[];
@@ -83,18 +88,6 @@ export default function Preview() {
     setLightboxIndex(index);
     setLightboxOpen(true);
   };
-
-  const nextImage = () => {
-    setLightboxIndex((prev) => (prev + 1) % lightboxImages.length);
-  };
-
-  const prevImage = () => {
-    setLightboxIndex((prev) => (prev - 1 + lightboxImages.length) % lightboxImages.length);
-  };
-
-  const closeLightbox = () => {
-    setLightboxOpen(false);
-  };
   if (shareLinkLoading || pageLoading || rowsLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -149,46 +142,16 @@ export default function Preview() {
       </main>
 
       {lightboxOpen && lightboxImages.length > 0 && (
-        <div 
-          className="fixed inset-0 z-[9999] bg-black/95 flex items-center justify-center"
-          onClick={closeLightbox}
-        >
-          <button
-            onClick={closeLightbox}
-            className="absolute top-4 right-4 z-10 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white"
-          >
-            <X className="w-6 h-6" />
-          </button>
-
-          <button
-            onClick={(e) => { e.stopPropagation(); prevImage(); }}
-            className="absolute left-4 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white"
-          >
-            <ChevronLeft className="w-8 h-8" />
-          </button>
-
-          <button
-            onClick={(e) => { e.stopPropagation(); nextImage(); }}
-            className="absolute right-4 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white"
-          >
-            <ChevronRight className="w-8 h-8" />
-          </button>
-
-          <div 
-            className="max-w-7xl max-h-[90vh] w-full h-full flex items-center justify-center p-4"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <img
-              src={lightboxImages[lightboxIndex]?.src}
-              alt="Lightbox"
-              className="max-w-full max-h-full object-contain"
-            />
-          </div>
-
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white bg-black/50 px-4 py-2 rounded-full">
-            {lightboxIndex + 1} / {lightboxImages.length}
-          </div>
-        </div>
+        <LightGallery
+          dynamic
+          dynamicEl={lightboxImages}
+          index={lightboxIndex}
+          plugins={[lgThumbnail, lgZoom]}
+          onAfterClose={() => setLightboxOpen(false)}
+          speed={500}
+          mode="lg-slide-circular-up"
+          loop={false}
+        />
       )}
     </div>
   );
