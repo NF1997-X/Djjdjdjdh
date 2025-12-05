@@ -149,6 +149,9 @@ export default function Preview() {
           onAfterClose={() => setLightboxOpen(false)}
           speed={500}
           mode="lg-slide-circular-up"
+          closable={true}
+          showCloseIcon={true}
+          counter={true}
         />
       )}
     </div>

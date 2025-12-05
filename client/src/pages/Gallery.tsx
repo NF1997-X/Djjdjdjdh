@@ -405,17 +405,18 @@ export default function Gallery() {
       </main>
 
       {lightboxOpen && (
-        <div className="fixed inset-0 z-[100]">
-          <LightGallery
-            dynamic
-            dynamicEl={lightboxImages}
-            index={lightboxIndex}
-            plugins={[lgThumbnail, lgZoom]}
-            onAfterClose={() => setLightboxOpen(false)}
-            speed={500}
-            mode="lg-slide-circular-up"
-          />
-        </div>
+        <LightGallery
+          dynamic
+          dynamicEl={lightboxImages}
+          index={lightboxIndex}
+          plugins={[lgThumbnail, lgZoom]}
+          onAfterClose={() => setLightboxOpen(false)}
+          speed={500}
+          mode="lg-slide-circular-up"
+          closable={true}
+          showCloseIcon={true}
+          counter={true}
+        />
       )}
 
       <AddImageDialog
