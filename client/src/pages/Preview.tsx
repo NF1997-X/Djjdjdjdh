@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useRoute } from "wouter";
 import { HorizontalScrollRow, ImageItem } from "@/components/HorizontalScrollRow";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -19,7 +19,6 @@ export default function Preview() {
   const [, params] = useRoute("/preview/:shortCode");
   const shortCode = params?.shortCode || "";
 
-  const lightGalleryRef = useRef<any>(null);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxImages, setLightboxImages] = useState<{ src: string; thumb: string }[]>([]);
   const [lightboxIndex, setLightboxIndex] = useState(0);
@@ -87,16 +86,8 @@ export default function Preview() {
     const images = rowImages.map((img) => ({ src: img.url, thumb: img.url }));
     setLightboxImages(images);
     setLightboxIndex(index);
-    setLightboxOpen(true);
+    setTimeout(() => setLightboxOpen(true), 10);
   };
-
-  useEffect(() => {
-    if (lightboxOpen && lightGalleryRef.current && lightboxImages.length > 0) {
-      requestAnimationFrame(() => {
-        lightGalleryRef.current?.openGallery(lightboxIndex);
-      });
-    }
-  }, [lightboxOpen, lightboxImages, lightboxIndex]);
 
   if (shareLinkLoading || pageLoading || rowsLoading) {
     return (
@@ -151,20 +142,13 @@ export default function Preview() {
         )}
       </main>
 
-      <div style={{ display: lightboxOpen ? 'block' : 'none' }}>
+      {lightboxOpen && lightboxImages.length > 0 && (
         <LightGallery
-          onInit={(detail) => {
-            if (!lightGalleryRef.current) {
-              lightGalleryRef.current = detail.instance;
-            }
-          }}
           dynamic
           dynamicEl={lightboxImages}
+          index={lightboxIndex}
           plugins={[lgThumbnail, lgZoom]}
-          onAfterClose={() => {
-            setLightboxOpen(false);
-            setLightboxImages([]);
-          }}
+          onAfterClose={() => setLightboxOpen(false)}
           speed={500}
           mode="lg-slide-circular-up"
           closable={true}
@@ -172,7 +156,7 @@ export default function Preview() {
           counter={true}
           loop={false}
         />
-      </div>
+      )}
     </div>
   );
 }

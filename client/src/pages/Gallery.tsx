@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -44,7 +44,6 @@ export default function Gallery() {
   const [shareLinkDialog, setShareLinkDialog] = useState<{ open: boolean; url?: string }>({ open: false });
   const [aboutPageDialog, setAboutPageDialog] = useState<{ open: boolean; pageId?: string }>({ open: false });
   
-  const lightGalleryRef = useRef<any>(null);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxImages, setLightboxImages] = useState<{ src: string; thumb: string }[]>([]);
   const [lightboxIndex, setLightboxIndex] = useState(0);
@@ -320,17 +319,9 @@ export default function Gallery() {
     const images = rowImages.map((img) => ({ src: img.url, thumb: img.url }));
     setLightboxImages(images);
     setLightboxIndex(index);
-    setLightboxOpen(true);
+    // Small delay to ensure state is set before opening
+    setTimeout(() => setLightboxOpen(true), 10);
   };
-
-  useEffect(() => {
-    if (lightboxOpen && lightGalleryRef.current && lightboxImages.length > 0) {
-      // Delay to ensure DOM is ready
-      requestAnimationFrame(() => {
-        lightGalleryRef.current?.openGallery(lightboxIndex);
-      });
-    }
-  }, [lightboxOpen, lightboxImages, lightboxIndex]);
 
   const currentEditImage = editImageDialog.imageId
     ? allImages.find((i) => i.id === editImageDialog.imageId)
@@ -414,20 +405,13 @@ export default function Gallery() {
         )}
       </main>
 
-      <div style={{ display: lightboxOpen ? 'block' : 'none' }}>
+      {lightboxOpen && lightboxImages.length > 0 && (
         <LightGallery
-          onInit={(detail) => {
-            if (!lightGalleryRef.current) {
-              lightGalleryRef.current = detail.instance;
-            }
-          }}
           dynamic
           dynamicEl={lightboxImages}
+          index={lightboxIndex}
           plugins={[lgThumbnail, lgZoom]}
-          onAfterClose={() => {
-            setLightboxOpen(false);
-            setLightboxImages([]);
-          }}
+          onAfterClose={() => setLightboxOpen(false)}
           speed={500}
           mode="lg-slide-circular-up"
           closable={true}
@@ -435,7 +419,7 @@ export default function Gallery() {
           counter={true}
           loop={false}
         />
-      </div>
+      )}
 
       <AddImageDialog
         open={addImageDialog.open}
