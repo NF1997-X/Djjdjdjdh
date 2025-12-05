@@ -95,7 +95,6 @@ export default function Preview() {
   const closeLightbox = () => {
     setLightboxOpen(false);
   };
-
   if (shareLinkLoading || pageLoading || rowsLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">

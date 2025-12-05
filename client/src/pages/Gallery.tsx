@@ -328,7 +328,6 @@ export default function Gallery() {
   const closeLightbox = () => {
     setLightboxOpen(false);
   };
-
   const currentEditImage = editImageDialog.imageId
     ? allImages.find((i) => i.id === editImageDialog.imageId)
     : undefined;
