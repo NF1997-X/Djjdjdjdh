@@ -1,4 +1,4 @@
-import { Plus, MoreVertical, Copy, ExternalLink, Edit2, Trash2 } from "lucide-react";
+import { Plus, MoreVertical, Copy, ExternalLink, Edit2, Trash2, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import {
@@ -23,9 +23,10 @@ interface PageTabsProps {
   onDeletePage: (pageId: string) => void;
   onCopyLink: (pageId: string) => void;
   onOpenPreview: (pageId: string) => void;
+  onAboutPage: (pageId: string) => void;
 }
 
-export function PageTabs({ pages, activePage, onPageChange, onAddPage, onEditPage, onDeletePage, onCopyLink, onOpenPreview }: PageTabsProps) {
+export function PageTabs({ pages, activePage, onPageChange, onAddPage, onEditPage, onDeletePage, onCopyLink, onOpenPreview, onAboutPage }: PageTabsProps) {
   return (
     <div className="border-b border-border bg-card">
       <div className="max-w-7xl mx-auto px-8 flex items-center gap-4">
@@ -54,6 +55,16 @@ export function PageTabs({ pages, activePage, onPageChange, onAddPage, onEditPag
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="start" data-testid={`menu-page-actions-${page.id}`}>
+                    <DropdownMenuItem onClick={() => onAboutPage(page.id)} data-testid={`menu-item-about-${page.id}`}>
+                      <Info className="w-4 h-4 mr-2" />
+                      About
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => onEditPage(page.id)} data-testid={`menu-item-edit-${page.id}`}>
+                      <Edit2 className="w-4 h-4 mr-2" />
+                      Rename
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={() => onCopyLink(page.id)} data-testid={`menu-item-copy-link-${page.id}`}>
                       <Copy className="w-4 h-4 mr-2" />
                       Copy Link
@@ -61,11 +72,6 @@ export function PageTabs({ pages, activePage, onPageChange, onAddPage, onEditPag
                     <DropdownMenuItem onClick={() => onOpenPreview(page.id)} data-testid={`menu-item-open-preview-${page.id}`}>
                       <ExternalLink className="w-4 h-4 mr-2" />
                       Open Preview
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => onEditPage(page.id)} data-testid={`menu-item-edit-${page.id}`}>
-                      <Edit2 className="w-4 h-4 mr-2" />
-                      Rename
                     </DropdownMenuItem>
                     {pages.length > 1 && (
                       <>

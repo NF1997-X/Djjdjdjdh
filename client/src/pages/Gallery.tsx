@@ -12,6 +12,7 @@ import { EditRowDialog } from "@/components/EditRowDialog";
 import { AddPageDialog } from "@/components/AddPageDialog";
 import { EditPageDialog } from "@/components/EditPageDialog";
 import { ShareLinkDialog } from "@/components/ShareLinkDialog";
+import { AboutPageDialog } from "@/components/AboutPageDialog";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -41,6 +42,7 @@ export default function Gallery() {
   const [editPageDialog, setEditPageDialog] = useState<{ open: boolean; pageId?: string }>({ open: false });
   const [deletePageDialog, setDeletePageDialog] = useState<{ open: boolean; pageId?: string }>({ open: false });
   const [shareLinkDialog, setShareLinkDialog] = useState<{ open: boolean; url?: string }>({ open: false });
+  const [aboutPageDialog, setAboutPageDialog] = useState<{ open: boolean; pageId?: string }>({ open: false });
   
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxImages, setLightboxImages] = useState<{ src: string; thumb: string }[]>([]);
@@ -357,6 +359,7 @@ export default function Gallery() {
         onDeletePage={(pageId) => setDeletePageDialog({ open: true, pageId })}
         onCopyLink={handleCopyLink}
         onOpenPreview={handleOpenPreview}
+        onAboutPage={(pageId) => setAboutPageDialog({ open: true, pageId })}
       />
 
       <main className="max-w-7xl mx-auto">
@@ -503,6 +506,14 @@ export default function Gallery() {
         open={shareLinkDialog.open}
         onOpenChange={(open) => setShareLinkDialog({ open })}
         shareUrl={shareLinkDialog.url || ""}
+      />
+
+      <AboutPageDialog
+        open={aboutPageDialog.open}
+        onOpenChange={(open) => setAboutPageDialog({ open })}
+        page={pages.find(p => p.id === aboutPageDialog.pageId) || null}
+        rows={rows}
+        images={allImages}
       />
     </div>
   );
