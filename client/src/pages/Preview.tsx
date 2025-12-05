@@ -160,7 +160,7 @@ export default function Preview() {
           plugins={[lgThumbnail, lgZoom]}
           onAfterClose={() => setLightboxOpen(false)}
           speed={500}
-          mode="lg-slide-circular-up"
+          mode="lg-fade"
           loop={false}
         />
       )}
