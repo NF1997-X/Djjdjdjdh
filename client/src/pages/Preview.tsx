@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useRoute } from "wouter";
 import { HorizontalScrollRow, ImageItem } from "@/components/HorizontalScrollRow";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { useQuery } from "@tanstack/react-query";
 import type { Page, Row, GalleryImage, ShareLink } from "@shared/schema";
 import LightGallery from "lightgallery/react";
@@ -116,6 +117,7 @@ export default function Preview() {
               <h1 className="text-3xl font-bold" data-testid="text-preview-title">{page.name}</h1>
               <p className="text-sm text-muted-foreground mt-1">Read-only preview</p>
             </div>
+            <ThemeToggle />
           </div>
         </div>
       </header>
