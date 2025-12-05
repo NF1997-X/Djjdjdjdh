@@ -358,8 +358,7 @@ export default function Gallery() {
         onEditPage={(pageId) => setEditPageDialog({ open: true, pageId })}
         onDeletePage={(pageId) => setDeletePageDialog({ open: true, pageId })}
         onCopyLink={handleCopyLink}
-        onOpenPreview={handleOpenPreview}
-        onAboutPage={(pageId) => setAboutPageDialog({ open: true, pageId })}
+        onDetailsPage={(pageId) => setAboutPageDialog({ open: true, pageId })}
       />
 
       <main className="max-w-7xl mx-auto">
