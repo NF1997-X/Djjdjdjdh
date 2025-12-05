@@ -317,24 +317,20 @@ export default function Gallery() {
   };
 
   const handleImageClick = (rowImages: GalleryImage[], index: number) => {
-    console.log('handleImageClick called', { rowImages, index });
     const images = rowImages.map((img) => ({ src: img.url, thumb: img.url }));
-    console.log('lightbox images:', images);
     setLightboxImages(images);
     setLightboxIndex(index);
-    
-    // Set timeout to ensure state is updated before opening
-    setTimeout(() => {
-      setLightboxOpen(true);
-    }, 0);
+    setLightboxOpen(true);
   };
 
   useEffect(() => {
     if (lightboxOpen && lightGalleryRef.current && lightboxImages.length > 0) {
-      console.log('Opening lightgallery with ref at index:', lightboxIndex);
-      lightGalleryRef.current.openGallery(lightboxIndex);
+      // Delay to ensure DOM is ready
+      requestAnimationFrame(() => {
+        lightGalleryRef.current?.openGallery(lightboxIndex);
+      });
     }
-  }, [lightboxOpen]); // Only depend on lightboxOpen, not lightboxIndex
+  }, [lightboxOpen, lightboxImages, lightboxIndex]);
 
   const currentEditImage = editImageDialog.imageId
     ? allImages.find((i) => i.id === editImageDialog.imageId)
@@ -418,27 +414,28 @@ export default function Gallery() {
         )}
       </main>
 
-      {console.log('lightboxOpen:', lightboxOpen, 'lightboxImages:', lightboxImages)}
-      {lightboxOpen && lightboxImages.length > 0 && (
+      <div style={{ display: lightboxOpen ? 'block' : 'none' }}>
         <LightGallery
           onInit={(detail) => {
-            console.log('LightGallery initialized', detail);
-            lightGalleryRef.current = detail.instance;
+            if (!lightGalleryRef.current) {
+              lightGalleryRef.current = detail.instance;
+            }
           }}
           dynamic
           dynamicEl={lightboxImages}
           plugins={[lgThumbnail, lgZoom]}
           onAfterClose={() => {
-            console.log('LightGallery closed');
             setLightboxOpen(false);
+            setLightboxImages([]);
           }}
           speed={500}
           mode="lg-slide-circular-up"
           closable={true}
           showCloseIcon={true}
           counter={true}
+          loop={false}
         />
-      )}
+      </div>
 
       <AddImageDialog
         open={addImageDialog.open}

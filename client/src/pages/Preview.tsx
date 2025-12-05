@@ -87,18 +87,16 @@ export default function Preview() {
     const images = rowImages.map((img) => ({ src: img.url, thumb: img.url }));
     setLightboxImages(images);
     setLightboxIndex(index);
-    
-    // Set timeout to ensure state is updated before opening
-    setTimeout(() => {
-      setLightboxOpen(true);
-    }, 0);
+    setLightboxOpen(true);
   };
 
   useEffect(() => {
     if (lightboxOpen && lightGalleryRef.current && lightboxImages.length > 0) {
-      lightGalleryRef.current.openGallery(lightboxIndex);
+      requestAnimationFrame(() => {
+        lightGalleryRef.current?.openGallery(lightboxIndex);
+      });
     }
-  }, [lightboxOpen]); // Only depend on lightboxOpen, not lightboxIndex
+  }, [lightboxOpen, lightboxImages, lightboxIndex]);
 
   if (shareLinkLoading || pageLoading || rowsLoading) {
     return (
@@ -153,22 +151,28 @@ export default function Preview() {
         )}
       </main>
 
-      {lightboxOpen && lightboxImages.length > 0 && (
+      <div style={{ display: lightboxOpen ? 'block' : 'none' }}>
         <LightGallery
           onInit={(detail) => {
-            lightGalleryRef.current = detail.instance;
+            if (!lightGalleryRef.current) {
+              lightGalleryRef.current = detail.instance;
+            }
           }}
           dynamic
           dynamicEl={lightboxImages}
           plugins={[lgThumbnail, lgZoom]}
-          onAfterClose={() => setLightboxOpen(false)}
+          onAfterClose={() => {
+            setLightboxOpen(false);
+            setLightboxImages([]);
+          }}
           speed={500}
           mode="lg-slide-circular-up"
           closable={true}
           showCloseIcon={true}
           counter={true}
+          loop={false}
         />
-      )}
+      </div>
     </div>
   );
 }
