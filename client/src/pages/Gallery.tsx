@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -44,6 +44,7 @@ export default function Gallery() {
   const [shareLinkDialog, setShareLinkDialog] = useState<{ open: boolean; url?: string }>({ open: false });
   const [aboutPageDialog, setAboutPageDialog] = useState<{ open: boolean; pageId?: string }>({ open: false });
   
+  const lightGalleryRef = useRef<any>(null);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxImages, setLightboxImages] = useState<{ src: string; thumb: string }[]>([]);
   const [lightboxIndex, setLightboxIndex] = useState(0);
@@ -321,6 +322,15 @@ export default function Gallery() {
     setLightboxIndex(index);
     setLightboxOpen(true);
   };
+
+  useEffect(() => {
+    if (lightboxOpen && lightGalleryRef.current && lightboxImages.length > 0) {
+      setTimeout(() => {
+        lightGalleryRef.current?.openGallery(lightboxIndex);
+      }, 50);
+    }
+  }, [lightboxOpen]);
+
   const currentEditImage = editImageDialog.imageId
     ? allImages.find((i) => i.id === editImageDialog.imageId)
     : undefined;
@@ -405,9 +415,11 @@ export default function Gallery() {
 
       {lightboxOpen && lightboxImages.length > 0 && (
         <LightGallery
+          onInit={(detail) => {
+            lightGalleryRef.current = detail.instance;
+          }}
           dynamic
           dynamicEl={lightboxImages}
-          index={lightboxIndex}
           plugins={[lgThumbnail, lgZoom]}
           onAfterClose={() => setLightboxOpen(false)}
           speed={500}

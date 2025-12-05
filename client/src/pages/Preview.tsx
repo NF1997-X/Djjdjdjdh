@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRoute } from "wouter";
 import { HorizontalScrollRow, ImageItem } from "@/components/HorizontalScrollRow";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -19,6 +19,7 @@ export default function Preview() {
   const [, params] = useRoute("/preview/:shortCode");
   const shortCode = params?.shortCode || "";
 
+  const lightGalleryRef = useRef<any>(null);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxImages, setLightboxImages] = useState<{ src: string; thumb: string }[]>([]);
   const [lightboxIndex, setLightboxIndex] = useState(0);
@@ -88,6 +89,14 @@ export default function Preview() {
     setLightboxIndex(index);
     setLightboxOpen(true);
   };
+
+  useEffect(() => {
+    if (lightboxOpen && lightGalleryRef.current && lightboxImages.length > 0) {
+      setTimeout(() => {
+        lightGalleryRef.current?.openGallery(lightboxIndex);
+      }, 50);
+    }
+  }, [lightboxOpen]);
   if (shareLinkLoading || pageLoading || rowsLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -143,9 +152,11 @@ export default function Preview() {
 
       {lightboxOpen && lightboxImages.length > 0 && (
         <LightGallery
+          onInit={(detail) => {
+            lightGalleryRef.current = detail.instance;
+          }}
           dynamic
           dynamicEl={lightboxImages}
-          index={lightboxIndex}
           plugins={[lgThumbnail, lgZoom]}
           onAfterClose={() => setLightboxOpen(false)}
           speed={500}
